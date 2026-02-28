@@ -9,10 +9,11 @@ with open(os.path.join(BASE_DIR, "secret_key.txt")) as f:
 
 DEBUG = True
 
-ALLOWED_HOSTS = ["10.0.0.156"]
+ALLOWED_HOSTS = ["10.0.0.156", "127.0.0.1"]
 
 # Application definition
 INSTALLED_APPS = [
+    'home.apps.HomeConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
