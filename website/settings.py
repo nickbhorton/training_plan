@@ -9,7 +9,7 @@ with open(os.path.join(BASE_DIR, "secret_key.txt")) as f:
 
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["10.0.0.156"]
 
 # Application definition
 INSTALLED_APPS = [
