@@ -11,6 +11,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["10.0.0.156", "127.0.0.1"]
 
+LOGIN_REDIRECT_URL = 'home'
+LOGOUT_REDIRECT_URL = 'home'
+
 # Application definition
 INSTALLED_APPS = [
     'home.apps.HomeConfig',
