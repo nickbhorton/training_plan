@@ -5,13 +5,26 @@
         <title>Training Planner</title>
     </head>
     <body>
-        <p>This is the home page for the training planner</p>
         {% if user.is_authenticated %}
             <p>Hello, {{ user.username }}!</p>
-            <a href="{% url 'logout' %}">Log Out</a>
+            <form action="{% url 'home:logout' %}" method="POST">
+                {% csrf_token %}
+                <button type="submit">Log out</button>
+            </form>
         {% else %}
-            <p>You are not logged in.</p>
-            <a href="{% url 'login' %}">Click here to Login</a>
+            <form action="{% url 'home:login' %}" method="post">
+                {% csrf_token %}
+                <fieldset>
+                    <legend><h1>Login</h1></legend>
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" name="username" placeholder="Enter your username">
+                    <br>
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" placeholder="Enter your password">
+                    <br>
+                    <button type="submit">Login</button>
+                </fieldset>
+            </form>
         {% endif %}
     </body>
 </html>
