@@ -17,6 +17,8 @@ LOGOUT_REDIRECT_URL = 'home'
 # Application definition
 INSTALLED_APPS = [
     'home.apps.HomeConfig',
+    'coach_dashboard.apps.CoachDashboardConfig',
+    'athlete_dashboard.apps.AthleteDashboardConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

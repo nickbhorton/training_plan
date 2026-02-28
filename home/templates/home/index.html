@@ -7,6 +7,12 @@
     <body>
         {% if user.is_authenticated %}
             <p>Hello, {{ user.username }}!</p>
+            {% if is_athlete %}
+                <a href="{% url 'athlete_dashboard:index' %}">Athlete Dashboard</a>
+            {% endif %}
+            {% if is_coach %}
+                <a href="{% url 'coach_dashboard:index' %}">Coach Dashboard</a>
+            {% endif %}
             <form action="{% url 'home:logout' %}" method="POST">
                 {% csrf_token %}
                 <button type="submit">Log out</button>
