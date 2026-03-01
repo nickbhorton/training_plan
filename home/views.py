@@ -15,7 +15,7 @@ def index(request):
     },request))
 
 def coach_dashboard(request):
-    coached_athletes = Athlete.objects.filter(coach__user__username=request.user.username)
+    coached_athletes = Athlete.objects.filter(coach__user__pk=request.user.pk)
     template = loader.get_template("home/coach_dashboard.html")
     return HttpResponse(template.render({"coached_athletes": coached_athletes},request))
 
