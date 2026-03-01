@@ -15,3 +15,9 @@ class Athlete(models.Model):
 
     def __str__(self):
         return self.user.username
+
+class TrainingDay(models.Model):
+    date = models.DateField()
+    athlete = models.ForeignKey(Athlete, on_delete=models.CASCADE)
+    coach = models.ForeignKey(Coach, on_delete=models.CASCADE)
+    distance = models.FloatField()
