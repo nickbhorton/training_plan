@@ -1,0 +1,17 @@
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8" />
+        <title>Training Planner</title>
+    </head>
+    <body>
+        <p>Create training plan for {{ athlete }}</p>
+        {% if error_message %}
+            <p>{{ error_message }}</p>
+        {% endif %}
+        <form action="{% url 'home:create_training_plan' athlete.pk %}" method="post">
+            {% csrf_token %}
+            {{ new_plan_form.as_p }}
+            <button type="submit">Create</button>
+        </form>
+    </body>
+</html>

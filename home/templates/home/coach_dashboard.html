@@ -7,7 +7,7 @@
         <h1>Coach Dashboard</h1>
         <h3>Athletes:</h3>
         {% for athlete in coached_athletes %}
-            <p>{{ athlete.user.username }}</p>
+            <a href="{% url 'home:training_plans_list' athlete.pk %}">{{ athlete }}</a>
         {% empty %}
             <p>No current athletes</p>
         {% endfor %}
