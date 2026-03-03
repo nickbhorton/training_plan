@@ -31,4 +31,4 @@ class TrainingDay(models.Model):
     distance = models.FloatField()
 
     def __str__(self):
-        return self.plan.athlete.user.username + " day"
+        return str(self.date) + ": " + str(self.distance)

@@ -1,36 +1,37 @@
-<!doctype html>
-<html lang="en-US">
-    <head>
-        <meta charset="utf-8" />
-        <title>Training Planner</title>
-    </head>
-    <body>
-        {% if user.is_authenticated %}
-            <p>Hello, {{ user.username }}!</p>
-            {% if is_athlete %}
-                <a href="{% url 'home:athlete_dashboard' %}">Athlete Dashboard</p>
-            {% endif %}
-            {% if is_coach %}
-                <a href="{% url 'home:coach_dashboard' %}">Coach Dashboard</p>
-            {% endif %}
-            <form action="{% url 'home:logout' %}" method="POST">
-                {% csrf_token %}
-                <button type="submit">Log out</button>
-            </form>
-        {% else %}
-            <form action="{% url 'home:login' %}" method="post">
-                {% csrf_token %}
-                <fieldset>
-                    <legend><h1>Login</h1></legend>
-                    <label for="username">Username:</label>
-                    <input type="text" id="username" name="username" placeholder="Enter your username">
-                    <br>
-                    <label for="password">Password:</label>
-                    <input type="password" id="password" name="password" placeholder="Enter your password">
-                    <br>
-                    <button type="submit">Login</button>
-                </fieldset>
-            </form>
-        {% endif %}
-    </body>
-</html>
+{% extends "home/base.html" %}
+{% block content %}
+{% if user.is_authenticated %}
+    <p>Hello, {{ user.username }}!</p>
+    {% if is_coach %}
+        <hr>
+        {% for plan in coach_plans %}
+            <a href="{% url 'home:plan_detail' plan.pk %}">{{ plan }}</a>
+            <a href="{% url 'home:change_plan' plan.pk %}"><button>Change</button></a>
+            <a href="{% url 'home:delete_plan' plan.pk %}"><button>Delete</button></a>
+            <hr>
+        {% empty %}
+            <p>No Current Training Plans</p>
+        {% endfor %}
+        <a href="{% url 'home:add_plan' %}"><button>Create New Plan</button></a>
+        <hr>
+    {% endif %}
+    <form action="{% url 'home:logout' %}" method="post">
+        {% csrf_token %}
+        <button type="submit">Log out</button>
+    </form>
+{% else %}
+    <form action="{% url 'home:login' %}" method="post">
+        {% csrf_token %}
+        <fieldset>
+            <legend><h1>Login</h1></legend>
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" placeholder="Enter your username">
+            <br>
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" placeholder="Enter your password">
+            <br>
+            <button type="submit">Login</button>
+        </fieldset>
+    </form>
+{% endif %}
+{% endblock %}

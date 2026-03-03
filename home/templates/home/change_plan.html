@@ -1,0 +1,8 @@
+{% extends "home/base.html" %}
+{% block content %}
+<form action="{% url 'home:change_plan' pk %}" method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Change Plan</button>
+</form>
+{% endblock %}

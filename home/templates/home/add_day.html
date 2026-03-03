@@ -1,0 +1,8 @@
+{% extends "home/base.html" %}
+{% block content %}
+<form action="{% url 'home:add_day' plan_pk day_count %}" method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Create Day</button>
+</form>
+{% endblock %}

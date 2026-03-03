@@ -1,0 +1,9 @@
+{% extends "home/base.html" %}
+{% block content %}
+<p>Are you use you want to delete {{ plan }}</p>
+<form action="{% url 'home:delete_plan' pk %}" method="post">
+    {% csrf_token %}
+    <button type="submit">Delete Plan</button>
+</form>
+<a href="{% url "home:index" %}"><button>Back</button></a>
+{% endblock %}

@@ -1,48 +1,103 @@
-from datetime import datetime
+from datetime import timedelta, date, datetime
 
 from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.urls import reverse
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, get_object_or_404
 
-from .forms import TrainingPlanForm
+from .forms import TrainingPlanForm, TrainingDayForm
 
 from .models import Athlete, Coach, TrainingPlan, TrainingDay
 
 def index(request):
+    if not request.user.is_anonymous:
+        is_athlete = Athlete.objects.filter(user=request.user).exists()
+        is_coach = Coach.objects.filter(user=request.user).exists()
+        coach_plans = TrainingPlan.objects.filter(coach__user=request.user)
+        return render(request, "home/index.html", {
+            "is_athlete": is_athlete,
+            "is_coach": is_coach,
+            "coach_plans": coach_plans 
+        })
     return render(request, "home/index.html", {
-        "is_athlete": Athlete.objects.filter(user__username=request.user).exists(),
-        "is_coach": Coach.objects.filter(user__username=request.user).exists(),
+        "is_athlete": False,
+        "is_coach": False,
+        "coach_plans": [] 
     })
 
-def coach_dashboard(request):
-    return render(request, "home/coach_dashboard.html", {"coached_athletes": Athlete.objects.filter(coach__user__pk=request.user.pk)})
-
-def training_plans_list(request, athlete_pk):
-    athlete = get_object_or_404(Athlete, pk=athlete_pk)
-    coach = get_object_or_404(Coach, user__pk=request.user.pk)
-    training_plans = TrainingPlan.objects.filter(athlete__pk=athlete.pk, coach__pk=coach.pk)
-    return render(request, "home/training_plans_list.html", {"athlete": athlete, "training_plans": training_plans})
-
-def create_training_plan(request, athlete_pk):
+def add_day(request, plan_pk, day_count):
+    plan = get_object_or_404(TrainingPlan, pk=plan_pk)
     if request.method == "POST":
-        new_plan_form = TrainingPlanForm(request.POST)
-        if new_plan_form.is_valid():
-            new_plan = TrainingPlan(
-                athlete=get_object_or_404(Athlete, pk=athlete_pk), 
-                coach=get_object_or_404(Coach, user__pk=request.user.pk),
-                start_date=new_plan_form.cleaned_data['start_date'],
-                end_date=new_plan_form.cleaned_data['end_date']
-            )
-            new_plan.save()
-            return HttpResponseRedirect(reverse("home:training_plans_list", args=(athlete_pk,)))
+        form = TrainingDayForm(request.POST)
+        if form.is_valid():
+            day = form.save(commit = False)
+            day.plan = plan
+            day.date = plan.start_date + timedelta(days=day_count) 
+            day.save()
+            return HttpResponseRedirect(reverse("home:plan_detail", args=(plan_pk,)))
     else:
-        new_plan_form = TrainingPlanForm()
-    return render(request, "home/create_training_plan.html", {"athlete": get_object_or_404(Athlete, pk=athlete_pk), "new_plan_form": new_plan_form})
+        form = TrainingDayForm()
+    return render(request, "home/add_day.html", {"form": form, "plan_pk": plan_pk, "day_count": day_count})
 
 
-def athlete_dashboard(request):
-    return render(request, "home/athlete_dashboard.html", {})
+def plan_detail(request, pk):
+    plan = get_object_or_404(TrainingPlan, pk=pk)
+    # create all days
+    days: list[dict] = []
+    for i in range((plan.end_date - plan.start_date).days + 1):
+        date_delta = plan.start_date + timedelta(days=i)
+        days.append({"date": date_delta, "count": i, "training_day": None})
+
+    # get TrainingDay objects
+    training_days = TrainingDay.objects.filter(plan__pk=pk)
+    day_count_training_day_tuples = []
+    for day in training_days:
+        day_count_training_day_tuples.append(((day.date - plan.start_date).days, day))
+
+    # put TrainingDay objects into days
+    for i, training_day in day_count_training_day_tuples:
+        days[i]["training_day"] = training_day
+
+    weeks: list[list[dict]] = []
+    week: list[dict] = []
+    for i, day in enumerate(days):
+        week.append(day)
+        if day["date"].weekday() == 6:
+            weeks.append(week)
+            week = []
+    if len(week) > 0:
+        weeks.append(week)
+    return render(request, "home/plan_detail.html", {"plan": plan, "weeks": weeks})
+
+def add_plan(request):
+    if request.method == "POST":
+        form = TrainingPlanForm(request.POST, user=request.user)
+        if form.is_valid():
+            plan = form.save(commit = False)
+            plan.coach = get_object_or_404(Coach, user=request.user)
+            plan.save()
+            return HttpResponseRedirect(reverse("home:index"))
+    else:
+        form = TrainingPlanForm(user=request.user)
+    return render(request, "home/add_plan.html", {"form": form})
+
+def change_plan(request, pk):
+    plan = get_object_or_404(TrainingPlan, pk=pk, coach__user=request.user)
+    if request.method == "POST":
+        form = TrainingPlanForm(request.POST, user=request.user, instance=plan)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse("home:index"))
+    else:
+        form = TrainingPlanForm(user=request.user, instance=plan)
+    return render(request, "home/change_plan.html", {"form": form, "pk": pk})
+
+def delete_plan(request, pk):
+    plan = get_object_or_404(TrainingPlan, pk=pk, coach__user=request.user)
+    if request.method == "POST":
+        plan.delete()
+        return HttpResponseRedirect(reverse("home:index"))
+    return render(request, "home/delete_plan.html", {"plan": plan, "pk": pk})
 
 def login_view(request):
     username = request.POST["username"]
